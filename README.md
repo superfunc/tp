@@ -1,6 +1,4 @@
-![](./misc/tp_logo.jpg) 
-
-*An idris package for typed, unix-style, path manipulation.*
+![](./misc/tp_logo.jpg) *An idris package for typed, unix-style, path manipulation.* ![](./misc/tp_logo.jpg)
 
 #### Usage:
 
