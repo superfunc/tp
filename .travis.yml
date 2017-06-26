@@ -2,4 +2,4 @@ os: osx
 install:
   - brew install idris
 script:
-  - echo "XXX: Update me when code is added"
+  - echo 'TBD'
