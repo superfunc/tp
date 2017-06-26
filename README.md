@@ -1,4 +1,7 @@
-![](./misc/tp_logo.jpg) *An idris package for typed, unix-style, path manipulation.* 
+![](./misc/tp_logo.jpg) TP: An idris package for typed, unix-style, path manipulation. 
+----
+
+[![Build Status](https://travis-ci.org/superfunc/tp.svg?branch=master)](https://travis-ci.org/superfunc/tp)
 
 #### Usage:
 
