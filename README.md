@@ -14,6 +14,8 @@ path manipulation. I'd like to add some neat usage of dependent types to
 this library, but the initial library just has Haskell-style,
 strongly-typed, paths. 
 
+Contributions are very welcome.
+
 #### Disclaimers:
 
 > 1) This is work in progress, I'll update this comment when I think things are usable/exist.
