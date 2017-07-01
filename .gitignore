@@ -1,5 +1,4 @@
 *.ibc
 *~
 .DS_STORE
-./src/
 ./test/
