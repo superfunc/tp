@@ -2,4 +2,4 @@ os: osx
 install:
   - brew install idris
 script:
-  - echo 'TBD'
+  - idris --build tp.ipkg 
