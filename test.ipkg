@@ -1,4 +1,0 @@
-package tp.test
-
-sourcedir = test
-modules = System.Posix.Paths.Test

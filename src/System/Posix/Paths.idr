@@ -56,7 +56,10 @@ rmConsectiveDots s = pack $ reverse $ rmConsectiveDotsImpl $ reverse $ unpack s
     
         rmConsectiveDotsImpl : List Char -> List Char
         rmConsectiveDotsImpl [] = []
-        rmConsectiveDotsImpl (c :: '.' :: '.' :: '/' :: cs) = c :: rmConsectiveDotsImpl (clearNextSegment cs)
+        rmConsectiveDotsImpl ('/' :: '.' :: '.' :: '/' :: cs) = (
+          rmConsectiveDotsImpl (clearNextSegment cs))
+        rmConsectiveDotsImpl (c :: '/' :: '.' :: '.' :: '/' :: cs) = (
+          c :: rmConsectiveDotsImpl (clearNextSegment cs))
         rmConsectiveDotsImpl (c :: cs) = c :: rmConsectiveDotsImpl cs
 
 
@@ -72,6 +75,7 @@ containsPrefixDotDot s = containsPrefixDotDotImpl $ unpack s
         containsPrefixDotDotImpl ('.' :: '.' :: cs) = True
         containsPrefixDotDotImpl (c :: cs) = False
 
+export
 normalize : String -> String
 normalize s = rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
 
