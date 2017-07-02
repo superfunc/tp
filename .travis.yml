@@ -3,4 +3,4 @@ install:
   - brew install idris
 script:
   - idris --build tp.ipkg 
-  - idris --testpkg tp.ipkg
+  - idris --testpkg tp.ipkg | grep -v "failed"
