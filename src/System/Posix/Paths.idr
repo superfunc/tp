@@ -8,8 +8,6 @@ module Paths
 
 import Data.Vect
 
-%default total
-
 public export
 data Kind = Directory | File
 
@@ -48,8 +46,6 @@ rmDotSlashPrefix s = pack $ rmDotSlashPrefixImpl (unpack s)
         rmDotSlashPrefixImpl ('.' :: '/' :: cs) = cs
         rmDotSlashPrefixImpl cs = cs
 
--- XXX: Fix this, it shouldnt be partial 
-partial
 rmConsectiveDots : String -> String
 rmConsectiveDots s = pack $ reverse $ rmConsectiveDotsImpl $ reverse $ unpack s
   where clearNextSegment : List Char -> List Char
@@ -121,15 +117,26 @@ mkAbsoluteFile raw = case parsePath raw Absolute of
 
 getFileExtensionImpl : String -> Maybe String
 getFileExtensionImpl s = case split (\c => c == '.') s of
-                              []        => Nothing
-                              (c :: cs) => Just $ last (c :: cs)
+                            []        => Nothing
+                            (c :: cs) => Just $ last (c :: cs)
 
 ||| Get the file extension from a path. If there
 ||| is no file extension, Nothing will be returned.
 export
 getFileExtension : Path _ File -> Maybe String
-getFileExtension (AbsoluteFile x) = getFileExtensionImpl x
-getFileExtension (RelativeFile x) = getFileExtensionImpl x
+getFileExtension (AbsoluteFile raw) = getFileExtensionImpl raw 
+getFileExtension (RelativeFile raw) = getFileExtensionImpl raw 
+
+getDirectoryNameImpl : String -> Maybe String
+getDirectoryNameImpl s = case (List.reverse (split (\c => c == '/') s)) of
+                              []        => Nothing
+                              (c :: cs) => Just $ concat $ List.reverse cs
+
+||| Get the directory name from a path.  
+export
+getDirectoryName : Path _ File -> Maybe String
+getDirectoryName (AbsoluteFile raw) = getDirectoryNameImpl raw
+getDirectoryName (RelativeFile raw) = getDirectoryNameImpl raw
 
 ||| Join two paths together.
 ||| Its only valid to concatenate certain types of paths 
@@ -146,7 +153,18 @@ concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (norma
 concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize (s1 ++ s2)))
 
 Show (Path a k) where
-  show (AbsoluteDirectory raw) = show raw
-  show (AbsoluteFile raw)      = show raw
-  show (RelativeDirectory raw) = show raw
-  show (RelativeFile raw)      = show raw
+  show (AbsoluteDirectory raw) = "Absolute Directory: " ++ raw
+  show (AbsoluteFile raw)      = "Absolute File: "      ++ raw
+  show (RelativeDirectory raw) = "Relative Directory: " ++ raw
+  show (RelativeFile raw)      = "Relative File: "      ++ raw
+
+||| Equality for Path.
+||| 
+||| Two paths are equal if they are of the same kind, same anchor,
+||| and the underlying normalized representations are equal.
+Eq (Path a k) where
+  (==) (AbsoluteFile s1)      (AbsoluteFile s2)      = s1 == s2
+  (==) (AbsoluteDirectory s1) (AbsoluteDirectory s2) = s1 == s2
+  (==) (RelativeDirectory s1) (RelativeDirectory s2) = s1 == s2
+  (==) (RelativeFile s1)      (RelativeFile s2)      = s1 == s2
+  (==) _                      _                      = False
