@@ -1,6 +1,9 @@
 os: osx
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
 install:
+  - brew install fish
   - brew install idris
 script:
-  - idris --build tp.ipkg 
-  - idris --testpkg tp.ipkg | grep -v "failed"
+  - fish build-verify.fish `which idris`
