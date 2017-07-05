@@ -1,11 +1,9 @@
 # Copyright (c) 2017, Josh Filstrup
-# Licensed under BSD3(see license.md file for details)
+# Licensed under MIT(see LICENSE file for details)
 #
 # A script used by travis to verify a build, including:
 # - Build the code
-# - Run examples
 # - Run tests
-# - Generate docs(and diff them against the installed copy)
 
 function runcmd
     if eval $argv >> $ROOT/build_log.txt 2>&1
