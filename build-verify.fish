@@ -6,11 +6,11 @@
 # - Run tests
 
 function runcmd
-    if eval $argv >> $ROOT/build_log.txt 2>&1
-        echo '✓ ' $argv 
+    if eval $argv >>$ROOT/build_log.txt 2>&1
+        echo '✓ ' $argv
     else
         echo '✗ ' $argv
-        exit 1 
+        exit 1
     end
 end
 
@@ -22,6 +22,7 @@ echo '-------------------------------------'
 echo 'Idris compiler found!'
 echo '-------------------------------------'
 
+runcmd "$IDRISCC --clean tp.ipkg"
 runcmd "$IDRISCC --build tp.ipkg"
 echo '-------------------------------------'
 echo 'Compilation ran successfully!'
@@ -31,4 +32,3 @@ runcmd "$IDRISCC --testpkg tp.ipkg | grep -v 'failed'"
 echo '-------------------------------------'
 echo 'Tests ran successfully!'
 echo '-------------------------------------'
-
