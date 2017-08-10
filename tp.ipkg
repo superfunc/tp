@@ -12,3 +12,7 @@ sourcedir = src
 modules = System.Posix.Paths 
           , Test.System.Posix.Paths
 tests = Paths.test_Normalization
+        , Paths.test_MkRelativePath
+        , Paths.test_MkRelativeDirectory
+        , Paths.test_MkAbsolutePath
+        , Paths.test_MkAbsoluteDirectory

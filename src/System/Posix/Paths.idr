@@ -62,7 +62,6 @@ rmConsectiveDots s = pack $ reverse $ rmConsectiveDotsImpl $ reverse $ unpack s
           c :: rmConsectiveDotsImpl (clearNextSegment cs))
         rmConsectiveDotsImpl (c :: cs) = c :: rmConsectiveDotsImpl cs
 
-
 containsTilde : String -> Bool
 containsTilde s = containsTildeImpl $ unpack s
   where containsTildeImpl [] = False
@@ -75,17 +74,56 @@ containsPrefixDotDot s = containsPrefixDotDotImpl $ unpack s
         containsPrefixDotDotImpl ('.' :: '.' :: cs) = True
         containsPrefixDotDotImpl (c :: cs) = False
 
+containsAnyDotDot : String -> Bool
+containsAnyDotDot s = containsAnyDotDotImpl $ unpack s
+  where containsAnyDotDotImpl : List Char -> Bool   
+        containsAnyDotDotImpl [] = False
+        containsAnyDotDotImpl ('.' :: '.' :: cs) = True
+        containsAnyDotDotImpl (c :: cs) = containsAnyDotDotImpl cs
+
+rmLeadingSlash : List Char -> String
+rmLeadingSlash [] = "" 
+rmLeadingSlash ('/' :: cs) = pack cs
+rmLeadingSlash cs = pack cs
+
+addFrontSlash : List Char -> String
+addFrontSlash [] = "" 
+addFrontSlash ('/' :: cs) = pack $ '/' :: cs
+addFrontSlash cs = pack $ '/' :: cs
+
+rmTrailingSlash : List Char -> String
+rmTrailingSlash cs = reverse $ rmLeadingSlash $ reverse cs 
+
+||| Normalize a string such that it can be used to construct a path
+||| via one of the mk* functions.
 export
-normalize : String -> String
-normalize s = rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
+normalize : Anchoring -> String -> String
+normalize Relative s = rmTrailingSlash $ unpack $ rmLeadingSlash $ unpack $ rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
+normalize Absolute s = rmTrailingSlash $ unpack $ addFrontSlash $ unpack $ rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s 
+
+parsePathImpl : List Char -> Anchoring -> Bool
+parsePathImpl ('/' :: s) Relative = False 
+parsePathImpl s Relative          = True 
+parsePathImpl ('/' :: s) Absolute = True 
+parsePathImpl s Absolute          = False 
 
 parsePath : String -> Anchoring -> Maybe String
-parsePath s a = let containsTilde' = containsTilde s
-                    containsPrefixDotDot' = containsPrefixDotDot s
-                    preconditionsFailed = containsTilde' || containsPrefixDotDot' in
-                if preconditionsFailed 
-                   then Nothing
-                   else Just (normalize s)
+parsePath s Absolute = let containsTilde' = containsTilde s
+                           containsAnyDotDot' = containsAnyDotDot s
+                           basicPreconditionsFailed = containsTilde' || containsAnyDotDot' in
+                       if basicPreconditionsFailed 
+                          then Nothing
+                          else (if parsePathImpl (unpack s) Absolute 
+                                   then Just (normalize Absolute s)
+                                   else Nothing)
+parsePath s Relative = let containsTilde' = containsTilde s
+                           containsPrefixDotDot' = containsPrefixDotDot s
+                           basicPreconditionsFailed = containsTilde' || containsPrefixDotDot' in
+                       if basicPreconditionsFailed 
+                          then Nothing
+                          else (if parsePathImpl (unpack s) Relative 
+                                   then Just (normalize Relative s)
+                                   else Nothing)
 
 ||| Attempt to construct a relative directory path from a string.
 ||| If the operation fails, it will return Nothing 
@@ -136,7 +174,7 @@ getDirectoryNameImpl s = case (List.reverse (split (\c => c == '/') s)) of
                               []        => Nothing
                               (c :: cs) => Just $ concat $ List.reverse cs
 
-||| Get the directory name from a path.  
+||| Get the directory name from a file path.
 export
 getDirectoryName : Path _ File -> Maybe String
 getDirectoryName (AbsoluteFile raw) = getDirectoryNameImpl raw
@@ -151,11 +189,12 @@ getDirectoryName (RelativeFile raw) = getDirectoryNameImpl raw
 ||| Any other combination should be disallowed by the type sig.
 export
 concat : Path a Directory -> Path Relative k -> (Path a k)
-concat (AbsoluteDirectory s1) (RelativeDirectory s2) = (AbsoluteDirectory (normalize (s1 ++ s2)))
-concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize (s1 ++ s2)))
-concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize (s1 ++ s2)))
-concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize (s1 ++ s2)))
+concat (AbsoluteDirectory s1) (RelativeDirectory s2) = (AbsoluteDirectory (normalize Absolute (s1 ++ s2)))
+concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize Absolute (s1 ++ s2)))
+concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize Relative (s1 ++ s2)))
+concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize Relative (s1 ++ s2)))
 
+export
 Show (Path a k) where
   show (AbsoluteDirectory raw) = "Absolute Directory: " ++ raw
   show (AbsoluteFile raw)      = "Absolute File: "      ++ raw

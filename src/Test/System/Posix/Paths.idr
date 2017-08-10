@@ -21,6 +21,62 @@ assertEq id f input expected = let res = f input in
                                             pure False
 
 export
+test_MkRelativePath : IO ()
+test_MkRelativePath = do putStrLn "--------------------------------------------"
+                         putStrLn "Running test_MkRelativePath"
+                         putStrLn "--------------------------------------------"
+                         
+export
+test_MkRelativeDirectory : IO ()
+test_MkRelativeDirectory = do putStrLn "--------------------------------------------"
+                              putStrLn "Running test_MkRelativeDirectory"
+                              putStrLn "--------------------------------------------"
+                         
+export
+test_MkAbsolutePath : IO ()
+test_MkAbsolutePath = do putStrLn "--------------------------------------------"
+                         putStrLn "Running test_MkAbsolutePath"
+                         putStrLn "--------------------------------------------"
+                         
+export
+test_MkAbsoluteDirectory : IO ()
+test_MkAbsoluteDirectory = do putStrLn "--------------------------------------------"
+                              putStrLn "Running test_MkAbsoluteDirectory"
+                              putStrLn "--------------------------------------------"
+                         
+                              (assertEq 
+                                "test_MkAbsoluteDirectory/basic"
+                                (show . Paths.mkAbsoluteDirectory)
+                                "/foo/bar/"
+                                "Just Absolute Directory: /foo/bar")
+
+                              (assertEq 
+                                "test_MkAbsoluteDirectory/normalized"
+                                (show . Paths.mkAbsoluteDirectory)
+                                "/foo/bar///baz/"
+                                "Just Absolute Directory: /foo/bar/baz")
+                        
+                              (assertEq 
+                                "test_MkAbsoluteDirectory/normalized2"
+                                (show . Paths.mkAbsoluteDirectory)
+                                "/foo/../bar///baz/"
+                                "Nothing")
+
+                              (assertEq 
+                                "test_MkAbsoluteDirectory/missingFrontSlash"
+                                (show . Paths.mkAbsoluteDirectory)
+                                "foo/bar/"
+                                "Nothing")
+                
+                              (assertEq 
+                                "test_MkAbsoluteDirectory/tildeExists"
+                                (show . Paths.mkAbsoluteDirectory)
+                                "~/foo/bar/"
+                                "Nothing")
+
+                              putStrLn ""
+
+export
 test_Normalization : IO ()
 test_Normalization = do putStrLn "--------------------------------------------"
                         putStrLn "Running test_Normalization"
@@ -28,29 +84,26 @@ test_Normalization = do putStrLn "--------------------------------------------"
 
                         (assertEq 
                           "test_Normalization/tooManySlashes" 
-                          Paths.normalize 
-                          "//foo/bar//baz////billy/" 
-                          "/foo/bar/baz/billy/")
+                          (Paths.normalize Absolute) 
+                          "//foo/bar//baz////billy/"
+                          "/foo/bar/baz/billy")
 
                         (assertEq 
                           "test_Normalization/dotSlashPrefix" 
-                          Paths.normalize 
-                          "./hello/there" 
+                          (Paths.normalize Relative) 
+                          "./hello/there"
                           "hello/there")
                         
                         (assertEq 
                           "test_Normalization/doubleDots" 
-                          Paths.normalize
+                          (Paths.normalize Relative)
                           "hello/../there" 
                           "there")
 
                         (assertEq 
                           "test_Normalization/manyDoubleDots" 
-                          Paths.normalize
+                          (Paths.normalize Relative)
                           "hello/../there/billy/../" 
                           "there")
 
-                        putStrLn "--------------------------------------------"
-                        putStrLn "Finished test_Normalization."
-                        putStrLn "--------------------------------------------"
-
+                        putStrLn ""
