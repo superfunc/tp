@@ -18,3 +18,5 @@ tests = Paths.test_Normalization
         , Paths.test_MkAbsoluteDirectory
         , Paths.test_Concatenation
         , Paths.test_Eq
+        , Paths.test_FileExtension
+        , Paths.test_DirectoryName

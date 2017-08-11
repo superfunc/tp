@@ -27,6 +27,67 @@ concatTestImpl id (Just left) (Just right) expected = let concatFn = Paths.conca
 concatTestImpl id _ _ _ = do putStrLn ("Test " ++ id ++ " failed! (Invalid args)")
                              pure False
 
+fileExtTestImpl : String -> (Maybe (Path a File)) -> String -> IO Bool
+fileExtTestImpl id (Just path) expected = assertEq id (show . Paths.getFileExtension) path expected
+fileExtTestImpl id _ _ = do putStrLn ("Test " ++ id ++ " failed! (Invalid args)")
+                            pure False
+
+dirNameTestImpl : String -> (Maybe (Path a File)) -> String -> IO Bool
+dirNameTestImpl id (Just path) expected = assertEq id (show . Paths.getDirectoryName) path expected
+dirNameTestImpl id _ _ = do putStrLn ("Test " ++ id ++ " failed! (Invalid args)")
+                            pure False
+
+export
+test_DirectoryName : IO ()
+test_DirectoryName = do putStrLn "--------------------------------------------"
+                        putStrLn "Running test_DirectoryName"
+                        putStrLn "--------------------------------------------"
+
+                        (dirNameTestImpl
+                          "test_DirectoryName/absoluteFile"
+                          (mkAbsoluteFile "/foo/bar/baz.txt")
+                          "Just \"/foo/bar\"")
+
+                        (dirNameTestImpl
+                          "test_DirectoryName/relativeFile"
+                          (mkRelativeFile "./foo/bar/baz.txt")
+                          "Just \"foo/bar\"")
+
+                        (dirNameTestImpl
+                          "test_DirectoryName/absoluteFileRoot"
+                          (mkAbsoluteFile "/")
+                          "Nothing")
+
+                        putStrLn ""
+
+export
+test_FileExtension : IO ()
+test_FileExtension = do putStrLn "--------------------------------------------"
+                        putStrLn "Running test_FileExtension"
+                        putStrLn "--------------------------------------------"
+
+                        (fileExtTestImpl
+                          "test_FileExtension/absolute"
+                          (mkAbsoluteFile "/foo/bar/baz.txt")
+                          "Just \"txt\"")
+
+                        (fileExtTestImpl
+                          "test_FileExtension/relative"
+                          (mkRelativeFile "./foo/bar/baz.txt")
+                          "Just \"txt\"")
+
+                        (fileExtTestImpl
+                          "test_FileExtension/relativeNoExtension"
+                          (mkRelativeFile "./foo/bar/baz")
+                          "Nothing")
+
+                        (fileExtTestImpl
+                          "test_FileExtension/absoluteNoExtension"
+                          (mkAbsoluteFile "/foo/bar/baz")
+                          "Nothing")
+
+                        putStrLn ""
+
 export
 test_Concatenation : IO ()
 test_Concatenation = do putStrLn "--------------------------------------------"
@@ -229,8 +290,13 @@ test_Normalization = do putStrLn "--------------------------------------------"
                           "hello/../there/billy/../" 
                           "there")
 
-                        putStrLn ""
+                        (assertEq 
+                          "test_Normalization/rootPath" 
+                          (Paths.normalize Absolute)
+                          "/" 
+                          "/")
 
+                        putStrLn ""
 
 export
 test_Eq : IO ()

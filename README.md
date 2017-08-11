@@ -5,6 +5,8 @@
 
 #### Usage:
 
+The [tests](src/Test/System/Posix/Paths.idr) provide decent examples for the time being.
+Once things have been cleaned up, I'll try to provide more thorough examples here.
 
 #### Dependencies:
 

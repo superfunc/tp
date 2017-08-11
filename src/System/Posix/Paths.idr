@@ -98,8 +98,17 @@ rmTrailingSlash cs = reverse $ rmLeadingSlash $ reverse cs
 ||| via one of the mk* functions.
 export
 normalize : Anchoring -> String -> String
-normalize Relative s = rmTrailingSlash $ unpack $ rmLeadingSlash $ unpack $ rmConsecutiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
-normalize Absolute s = rmTrailingSlash $ unpack $ addFrontSlash $ unpack $ rmDotSlashPrefix $ rmConsecutiveSlashes s 
+normalize Relative s = rmTrailingSlash $ 
+                       unpack $ 
+                       rmLeadingSlash $ 
+                       unpack $ 
+                       rmConsecutiveDots $ 
+                       rmDotSlashPrefix $ 
+                       rmConsecutiveSlashes s  
+normalize Absolute s = let s' = unpack $ rmDotSlashPrefix $ rmConsecutiveSlashes s in
+                           if length s' == 1 
+                              then addFrontSlash s'
+                              else rmTrailingSlash $ unpack $ addFrontSlash s'
 
 parsePathImpl : List Char -> Anchoring -> Bool
 parsePathImpl ('/' :: s) Relative = False 
@@ -108,17 +117,19 @@ parsePathImpl ('/' :: s) Absolute = True
 parsePathImpl s Absolute          = False 
 
 parsePath : String -> Anchoring -> Maybe String
-parsePath s Absolute = let containsTilde' = containsTilde s
+parsePath s Absolute = let empty = isNil (unpack s)
+                           containsTilde' = containsTilde s
                            containsAnyDotDot' = containsAnyDotDot s
-                           basicPreconditionsFailed = containsTilde' || containsAnyDotDot' in
+                           basicPreconditionsFailed = empty || containsTilde' || containsAnyDotDot' in
                        if basicPreconditionsFailed 
                           then Nothing
                           else (if parsePathImpl (unpack s) Absolute 
                                    then Just (normalize Absolute s)
                                    else Nothing)
-parsePath s Relative = let containsTilde' = containsTilde s
+parsePath s Relative = let empty = isNil (unpack s)
+                           containsTilde' = containsTilde s
                            containsPrefixDotDot' = containsPrefixDotDot s
-                           basicPreconditionsFailed = containsTilde' || containsPrefixDotDot' in
+                           basicPreconditionsFailed = empty || containsTilde' || containsPrefixDotDot' in
                        if basicPreconditionsFailed 
                           then Nothing
                           else (if parsePathImpl (unpack s) Relative 
@@ -160,6 +171,7 @@ mkAbsoluteFile raw = case parsePath raw Absolute of
 getFileExtensionImpl : String -> Maybe String
 getFileExtensionImpl s = case split (\c => c == '.') s of
                             []        => Nothing
+                            [c]       => Nothing
                             (c :: cs) => Just $ last (c :: cs)
 
 ||| Get the file extension from a path. If there
@@ -172,7 +184,8 @@ getFileExtension (RelativeFile raw) = getFileExtensionImpl raw
 getDirectoryNameImpl : String -> Maybe String
 getDirectoryNameImpl s = case (List.reverse (split (\c => c == '/') s)) of
                               []        => Nothing
-                              (c :: cs) => Just $ concat $ List.reverse cs
+                              ["", ""]  => Nothing
+                              (c :: cs) => Just $ concat $ intersperse "/" $ List.reverse cs
 
 ||| Get the directory name from a file path.
 export
@@ -193,6 +206,13 @@ concat (AbsoluteDirectory s1) (RelativeDirectory s2) = (AbsoluteDirectory (norma
 concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize Absolute (s1 ++ "/" ++ s2)))
 concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize Relative (s1 ++ "/" ++ s2)))
 concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize Relative (s1 ++ "/" ++ s2)))
+
+export 
+str : Path a k -> String
+str (AbsoluteFile raw)      = raw
+str (AbsoluteDirectory raw) = raw
+str (RelativeFile raw)      = raw
+str (RelativeDirectory raw) = raw
 
 export
 Show (Path a k) where
