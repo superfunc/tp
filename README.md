@@ -15,7 +15,7 @@ strongly-typed, paths.
 
 Contributions are very welcome.
 
-#### Disclaimers:
+#### Disclaimer(s):
 
 > 1) This work is my sole effort and is in no way associated with or sponsored by
 my current, past, or future employer(s).

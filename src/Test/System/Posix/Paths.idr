@@ -230,3 +230,24 @@ test_Normalization = do putStrLn "--------------------------------------------"
                           "there")
 
                         putStrLn ""
+
+
+export
+test_Eq : IO ()
+test_Eq = do putStrLn "--------------------------------------------"
+             putStrLn "Running test_Eq"
+             putStrLn "--------------------------------------------"
+
+             (assertEq 
+                "test_Eq/basic"
+                ((==) (mkAbsoluteDirectory "/foo/bar"))
+                (mkAbsoluteDirectory "/foo/bar")
+                True) 
+
+             (assertEq 
+                "test_Eq/basic2"
+                ((==) (mkAbsoluteDirectory "/foo/bar"))
+                (mkAbsoluteDirectory "/foo/bar/baz")
+                False) 
+
+             putStrLn ""

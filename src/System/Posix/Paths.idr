@@ -205,6 +205,7 @@ Show (Path a k) where
 ||| 
 ||| Two paths are equal if they are of the same kind, same anchor,
 ||| and the underlying normalized representations are equal.
+export
 Eq (Path a k) where
   (==) (AbsoluteFile s1)      (AbsoluteFile s2)      = s1 == s2
   (==) (AbsoluteDirectory s1) (AbsoluteDirectory s2) = s1 == s2
