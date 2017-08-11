@@ -20,23 +20,146 @@ assertEq id f input expected = let res = f input in
                                             putStrLn ("\t Input: " ++ (show input))
                                             pure False
 
+concatTestImpl : String -> (Maybe (Path t Directory)) 
+                        -> (Maybe (Path Relative k)) -> String -> IO Bool
+concatTestImpl id (Just left) (Just right) expected = let concatFn = Paths.concat left in
+                                                        assertEq id (show . concatFn) right expected 
+concatTestImpl id _ _ _ = do putStrLn ("Test " ++ id ++ " failed! (Invalid args)")
+                             pure False
+
 export
-test_MkRelativePath : IO ()
-test_MkRelativePath = do putStrLn "--------------------------------------------"
-                         putStrLn "Running test_MkRelativePath"
+test_Concatenation : IO ()
+test_Concatenation = do putStrLn "--------------------------------------------"
+                        putStrLn "Running test_Concatenation"
+                        putStrLn "--------------------------------------------"
+
+                        (concatTestImpl
+                          "test_Concatenation/absRelFile"
+                          (mkAbsoluteDirectory "/foo/bar")
+                          (mkRelativeFile "temp.txt")
+                          "Absolute File: /foo/bar/temp.txt")
+
+                        (concatTestImpl
+                          "test_Concatenation/absRelDir"
+                          (mkAbsoluteDirectory "/foo/bar")
+                          (mkRelativeDirectory "temp")
+                          "Absolute Directory: /foo/bar/temp")
+
+                        (concatTestImpl
+                          "test_Concatenation/relRelFile"
+                          (mkRelativeDirectory "./foo/bar")
+                          (mkRelativeFile "temp.txt")
+                          "Relative File: foo/bar/temp.txt")
+
+                        (concatTestImpl
+                          "test_Concatenation/relRelDir"
+                          (mkRelativeDirectory "./foo/bar")
+                          (mkRelativeDirectory "temp")
+                          "Relative Directory: foo/bar/temp")
+
+                        (concatTestImpl
+                          "test_Concatenation/normalize"
+                          (mkRelativeDirectory "./foo///bar//baz")
+                          (mkRelativeDirectory "temp/")
+                          "Relative Directory: foo/bar/baz/temp")
+
+                        putStrLn ""
+
+export
+test_MkRelativeFile : IO ()
+test_MkRelativeFile = do putStrLn "--------------------------------------------"
+                         putStrLn "Running test_MkRelativeFile"
                          putStrLn "--------------------------------------------"
+
+                         (assertEq 
+                           "test_MkRelativeFile/basic"
+                           (show . Paths.mkRelativeFile)
+                           "./foo/bar/temp.txt"
+                           "Just Relative File: foo/bar/temp.txt")
+
+                         (assertEq 
+                           "test_MkRelativeFile/absolute"
+                           (show . Paths.mkRelativeFile)
+                           "/foo/bar/temp.txt"
+                           "Nothing")
+
+                         (assertEq 
+                           "test_MkRelativeFile/normalized"
+                           (show . Paths.mkRelativeFile)
+                           "foo/bar///baz//temp.txt"
+                           "Just Relative File: foo/bar/baz/temp.txt")
+
+                         (assertEq 
+                           "test_MkRelativeFile/relativeSpecifiers"
+                           (show . Paths.mkRelativeFile)
+                           "foo/bill/../bar/../baz/temp.txt"
+                           "Just Relative File: foo/baz/temp.txt")
+
+                         putStrLn ""
                          
 export
 test_MkRelativeDirectory : IO ()
 test_MkRelativeDirectory = do putStrLn "--------------------------------------------"
                               putStrLn "Running test_MkRelativeDirectory"
                               putStrLn "--------------------------------------------"
+
+                              (assertEq 
+                                "test_MkRelativeDirectory/basic"
+                                (show . Paths.mkRelativeDirectory)
+                                "./foo/bar/"
+                                "Just Relative Directory: foo/bar")
+
+                              (assertEq 
+                                "test_MkRelativeDirectory/absolute"
+                                (show . Paths.mkRelativeDirectory)
+                                "/foo/bar/"
+                                "Nothing")
+
+                              (assertEq 
+                                "test_MkRelativeDirectory/normalized"
+                                (show . Paths.mkRelativeDirectory)
+                                "foo/bar///baz//"
+                                "Just Relative Directory: foo/bar/baz")
+
+                              (assertEq 
+                                "test_MkRelativeDirectory/relativeSpecifiers"
+                                (show . Paths.mkRelativeDirectory)
+                                "foo/bill/../bar/../baz/"
+                                "Just Relative Directory: foo/baz")
+
+                              putStrLn ""
                          
 export
-test_MkAbsolutePath : IO ()
-test_MkAbsolutePath = do putStrLn "--------------------------------------------"
-                         putStrLn "Running test_MkAbsolutePath"
+test_MkAbsoluteFile : IO ()
+test_MkAbsoluteFile = do putStrLn "--------------------------------------------"
+                         putStrLn "Running test_MkAbsoluteFile"
                          putStrLn "--------------------------------------------"
+
+                         (assertEq 
+                           "test_MkAbsoluteDirectory/basic"
+                           (show . Paths.mkAbsoluteFile)
+                           "/foo/bar/baz.txt"
+                           "Just Absolute File: /foo/bar/baz.txt")
+
+                         (assertEq 
+                           "test_MkAbsoluteDirectory/normalized"
+                           (show . Paths.mkAbsoluteFile)
+                           "/foo//bar/////baz.txt"
+                           "Just Absolute File: /foo/bar/baz.txt")
+
+                         (assertEq 
+                           "test_MkAbsoluteDirectory/relative"
+                           (show . Paths.mkAbsoluteFile)
+                           "./foo/bar/baz.txt"
+                           "Nothing")
+
+                         (assertEq 
+                           "test_MkAbsoluteDirectory/relativeSpecifiers"
+                           (show . Paths.mkAbsoluteFile)
+                           "/foo/../bar/../baz.txt"
+                           "Nothing")
+
+                         putStrLn ""
                          
 export
 test_MkAbsoluteDirectory : IO ()

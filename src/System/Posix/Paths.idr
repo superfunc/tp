@@ -2,6 +2,8 @@
 -- Module    : System.Posix.Paths
 -- Copyright : (c) 2017 Josh Filstrup
 -- License   : see LICENSE
+-- TODO: Make ... specifiers not work
+-- TODO: Consider making paths relative to a specific directory
 -- --------------------------------------------------------------------- [ EOH ]
 
 module Paths
@@ -46,21 +48,19 @@ rmDotSlashPrefix s = pack $ rmDotSlashPrefixImpl (unpack s)
         rmDotSlashPrefixImpl ('.' :: '/' :: cs) = cs
         rmDotSlashPrefixImpl cs = cs
 
-rmConsectiveDots : String -> String
-rmConsectiveDots s = pack $ reverse $ rmConsectiveDotsImpl $ reverse $ unpack s
+rmConsecutiveDots : String -> String
+rmConsecutiveDots s = pack $ reverse $ rmConsecutiveDotsImpl $ reverse $ unpack s
   where clearNextSegment : List Char -> List Char
         clearNextSegment [] = []
         clearNextSegment (c :: cs) = if c == '/' 
                                         then cs
                                         else clearNextSegment cs
     
-        rmConsectiveDotsImpl : List Char -> List Char
-        rmConsectiveDotsImpl [] = []
-        rmConsectiveDotsImpl ('/' :: '.' :: '.' :: '/' :: cs) = (
-          rmConsectiveDotsImpl (clearNextSegment cs))
-        rmConsectiveDotsImpl (c :: '/' :: '.' :: '.' :: '/' :: cs) = (
-          c :: rmConsectiveDotsImpl (clearNextSegment cs))
-        rmConsectiveDotsImpl (c :: cs) = c :: rmConsectiveDotsImpl cs
+        rmConsecutiveDotsImpl : List Char -> List Char
+        rmConsecutiveDotsImpl [] = []
+        rmConsecutiveDotsImpl ('/' :: '.' :: '.' :: '/' :: cs) = (
+          rmConsecutiveDotsImpl ('/' :: clearNextSegment cs))
+        rmConsecutiveDotsImpl (c :: cs) = c :: rmConsecutiveDotsImpl cs
 
 containsTilde : String -> Bool
 containsTilde s = containsTildeImpl $ unpack s
@@ -98,8 +98,8 @@ rmTrailingSlash cs = reverse $ rmLeadingSlash $ reverse cs
 ||| via one of the mk* functions.
 export
 normalize : Anchoring -> String -> String
-normalize Relative s = rmTrailingSlash $ unpack $ rmLeadingSlash $ unpack $ rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
-normalize Absolute s = rmTrailingSlash $ unpack $ addFrontSlash $ unpack $ rmConsectiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s 
+normalize Relative s = rmTrailingSlash $ unpack $ rmLeadingSlash $ unpack $ rmConsecutiveDots $ rmDotSlashPrefix $ rmConsecutiveSlashes s  
+normalize Absolute s = rmTrailingSlash $ unpack $ addFrontSlash $ unpack $ rmDotSlashPrefix $ rmConsecutiveSlashes s 
 
 parsePathImpl : List Char -> Anchoring -> Bool
 parsePathImpl ('/' :: s) Relative = False 
@@ -189,10 +189,10 @@ getDirectoryName (RelativeFile raw) = getDirectoryNameImpl raw
 ||| Any other combination should be disallowed by the type sig.
 export
 concat : Path a Directory -> Path Relative k -> (Path a k)
-concat (AbsoluteDirectory s1) (RelativeDirectory s2) = (AbsoluteDirectory (normalize Absolute (s1 ++ s2)))
-concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize Absolute (s1 ++ s2)))
-concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize Relative (s1 ++ s2)))
-concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize Relative (s1 ++ s2)))
+concat (AbsoluteDirectory s1) (RelativeDirectory s2) = (AbsoluteDirectory (normalize Absolute (s1 ++ "/" ++ s2)))
+concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize Absolute (s1 ++ "/" ++ s2)))
+concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize Relative (s1 ++ "/" ++ s2)))
+concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize Relative (s1 ++ "/" ++ s2)))
 
 export
 Show (Path a k) where

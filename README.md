@@ -5,7 +5,6 @@
 
 #### Usage:
 
-`TBD`
 
 #### Dependencies:
 
@@ -18,7 +17,5 @@ Contributions are very welcome.
 
 #### Disclaimers:
 
-> 1) This is work in progress, I'll update this comment when I think things are usable/exist.
-
-> 2) This work is my sole effort and is in no way associated with or sponsored by
+> 1) This work is my sole effort and is in no way associated with or sponsored by
 my current, past, or future employer(s).
