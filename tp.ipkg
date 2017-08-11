@@ -2,7 +2,7 @@ package tp
 
 author = "Josh Filstrup <github.com/superfunc>"
 brief = "A strongly typed unix path library."
-version = 0.0
+version = 0.1
 readme = ./README.md
 license = MIT 
 sourceloc  = git://git@github.com:superfunc/tp.git

@@ -2,17 +2,17 @@
 -- Module    : System.Posix.Paths
 -- Copyright : (c) 2017 Josh Filstrup
 -- License   : see LICENSE
--- TODO: Make ... specifiers not work
--- TODO: Consider making paths relative to a specific directory
 -- --------------------------------------------------------------------- [ EOH ]
 
 module Paths
 
 import Data.Vect
 
+||| A type level distinguishment between files and directories.
 public export
 data Kind = Directory | File
 
+||| A type level distinguishment between absolute paths and relative ones.
 public export
 data Anchoring = Relative | Absolute
 
@@ -207,6 +207,7 @@ concat (AbsoluteDirectory s1) (RelativeFile s2)      = (AbsoluteFile (normalize 
 concat (RelativeDirectory s1) (RelativeDirectory s2) = (RelativeDirectory (normalize Relative (s1 ++ "/" ++ s2)))
 concat (RelativeDirectory s1) (RelativeFile s2)      = (RelativeFile (normalize Relative (s1 ++ "/" ++ s2)))
 
+||| String representation for Path.
 export 
 str : Path a k -> String
 str (AbsoluteFile raw)      = raw
@@ -214,6 +215,7 @@ str (AbsoluteDirectory raw) = raw
 str (RelativeFile raw)      = raw
 str (RelativeDirectory raw) = raw
 
+||| Pretty for Path.
 export
 Show (Path a k) where
   show (AbsoluteDirectory raw) = "Absolute Directory: " ++ raw
