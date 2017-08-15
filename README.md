@@ -3,12 +3,13 @@
 
 [![Build Status](https://travis-ci.org/superfunc/tp.svg?branch=master)](https://travis-ci.org/superfunc/tp)
 
-#### Usage:
-
-The [tests](src/Test/System/Posix/Paths.idr) provide decent examples for the time being.
-Once things have been cleaned up, I'll try to provide more thorough examples here.
-
 #### Overview:
+
+This repo provides an idris package, `System.Posix.Paths` for typed
+path manipulation. I'd like to add some neat usage of dependent types to
+this library, but the initial library just has Haskell-style,
+strongly-typed, paths. 
+
 The core pieces are:
 
 - `Path`: An opaque path type that encodes the kind(file/directory) 
@@ -27,16 +28,17 @@ of paths that can be used via the kind/anchoring, preventing a large class of
 errors. In other cases, we use Maybe to encode possible failure, such as in
 the case of the `mk` functions.
 
+#### Usage:
+
+The [tests](src/Test/System/Posix/Paths.idr) provide decent examples for the time being.
+Once things have been cleaned up, I'll try to provide more thorough examples here.
+
 #### Dependencies:
 
-This package provides an idris package, `System.Posix.Paths` for typed
-path manipulation. I'd like to add some neat usage of dependent types to
-this library, but the initial library just has Haskell-style,
-strongly-typed, paths. 
-
-Contributions are very welcome.
+None
 
 #### Disclaimer(s):
+> 0) Contributions are very welcome.
 
 > 1) This work is my sole effort and is in no way associated with or sponsored by
 my current, past, or future employer(s).
