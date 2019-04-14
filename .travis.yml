@@ -1,9 +1,0 @@
-os: osx
-cache:
-  directories:
-    - $HOME/Library/Caches/Homebrew
-install:
-  - brew install fish
-  - brew install idris
-script:
-  - fish build-verify.fish `which idris`
