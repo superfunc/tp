@@ -1,8 +1,6 @@
 ![](./misc/tp_logo.jpg) TP: An idris package for typed, unix-style, path manipulation. 
 ----
 
-[![Build Status](https://travis-ci.org/superfunc/tp.svg?branch=master)](https://travis-ci.org/superfunc/tp)
-
 #### Overview:
 
 This repo provides an idris package, `System.Posix.Paths` for typed
