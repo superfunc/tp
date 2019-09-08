@@ -1,5 +1,6 @@
 ![](./misc/tp_logo.jpg) TP: An idris package for typed, unix-style, path manipulation. 
 ----
+![Build status badge](https://github.com/superfunc/tp/workflows/CI/badge.svg)
 
 #### Overview:
 
